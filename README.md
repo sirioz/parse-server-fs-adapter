@@ -4,10 +4,11 @@
 
 parse-server file system storage adapter 
 
+I added an option to split files over many subdirectory, to speed up the retrieval
 
 # installation
 
-`npm install --save parse-server-fs-adapter`
+`npm install --save parse-server-fs-split-adapter`
 
 # usage with parse-server
 
