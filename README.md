@@ -4,8 +4,8 @@
 
 parse-server file system storage adapter, with a spread option.
 
-[WORK IN PROGRESS, DO NOT USE] I added an option to spread files over N levels of subfolders, to speed up fetching and retrieval in case of many thousands of files. Default number of levels is 2, maximum is 8.
-<br/>Example: image.jpg (file name MD5 = 0d5b1c4c7f720f698946c7f6ab08f687) will go in 0d/5b folder => 0d/5b/image.jpg.
+I added the option to <strong>spread files on N levels of subfolders</strong>, to speed up storage and fetching in case of many thousands of files. Default number of levels is 2, maximum is 8.
+<br/>Example: image.jpg (file name MD5 = <strong>0d5b</strong>1c4c7f720f698946c7f6ab08f687) will go in 0d/5b folder => 0d/5b/image.jpg.
 
 # installation
 
