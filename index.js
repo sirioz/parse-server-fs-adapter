@@ -7,20 +7,26 @@
 var fs = require('fs');
 var path = require('path');
 var pathSep = require('path').sep;
+var md5 = require('md5');
 
 function FileSystemAdapter(options) {
   options = options || {};
   let filesSubDirectory = options.filesSubDirectory || '';
+  this._spread = options.spread || true;
+  this._spreadDepth = options.spreadDepth || 2;
+  this._spreadDepth = Math.min(this._spreadDepth,8); // md5 hash is 16 chars long, then max depth is 8
   this._filesDir = filesSubDirectory;
   this._mkdir(this._getApplicationDir());
   if (!this._applicationDirExist()) {
     throw "Files directory doesn't exist.";
   }
+  //console.log("parse-server-fs-spread-adapter initialized.")
 }
 
 FileSystemAdapter.prototype.createFile = function(filename, data) {
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
+    //let filepath = this._getLocalFilePath(filename);
+    let filepath = this._getSpreadFilePath(filename,true);
     fs.writeFile(filepath, data, (err) => {
       if(err !== null) {
         return reject(err);
@@ -32,7 +38,8 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
 
 FileSystemAdapter.prototype.deleteFile = function(filename) {
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
+    //let filepath = this._getLocalFilePath(filename);
+    let filepath = this._getSpreadFilePath(filename);
     fs.readFile( filepath , function (err, data) {
       if(err !== null) {
         return reject(err);
@@ -50,7 +57,8 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 
 FileSystemAdapter.prototype.getFileData = function(filename) {
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
+    //let filepath = this._getLocalFilePath(filename);
+    let filepath = this._getSpreadFilePath(filename);
     fs.readFile( filepath , function (err, data) {
       if(err !== null) {
         return reject(err);
@@ -69,6 +77,7 @@ FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
  --------------- */
  FileSystemAdapter.prototype._getApplicationDir = function() {
   if (this._filesDir) {
+    if (path.isAbsolute(this._filesDir)) return this._filesDir;
     return path.join('files', this._filesDir);
   } else {
     return 'files';
@@ -79,7 +88,20 @@ FileSystemAdapter.prototype._applicationDirExist = function() {
   return fs.existsSync(this._getApplicationDir());
 }
 
-FileSystemAdapter.prototype._getLocalFilePath = function(filename) {
+FileSystemAdapter.prototype._getSpreadFilePath = function(filename,create) {
+  let hash = md5(filename);
+  var spath = this._getApplicationDir();
+  for (var i=0;i<this._spreadDepth;i++) {
+    var folder = hash.substr(i*2, 2);
+    spath = path.join(spath,folder);
+  }
+  if (create) {
+    this._mkdir(spath);
+  }
+  return path.join(spath,filename);
+}
+
+FileSystemAdapter.prototype._getLocalFilePath = function(filename,create) {
   let applicationDir = this._getApplicationDir();
   if (!fs.existsSync(applicationDir)) {
     this._mkdir(applicationDir);
