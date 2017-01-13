@@ -12,8 +12,12 @@ var md5 = require('md5');
 function FileSystemAdapter(options) {
   options = options || {};
   let filesSubDirectory = options.filesSubDirectory || '';
-  this._spread = options.spread || true;
-  this._spreadDepth = options.spreadDepth || 2;
+  this._spread = typeof options.spread === 'undefined' ? true : options.spread;
+  if (this._spread) {
+    this._spreadDepth = options.spreadDepth || 2;
+  } else {
+    this._spreadDepth = 0;
+  }
   this._spreadDepth = Math.min(this._spreadDepth,8); // md5 hash is 16 chars long, then max depth is 8
   this._filesDir = filesSubDirectory;
   this._mkdir(this._getApplicationDir());
